@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Flores Amarillas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,6 +25,9 @@
     color:var(--tinta);
     font-family:'Inter',system-ui,sans-serif;
     overflow:hidden;
+    /* en movil: ni rebote elastico ni recarga al arrastrar hacia abajo */
+    overscroll-behavior:none;
+    -webkit-text-size-adjust:100%;
   }
 
   /* ---------- capas de ambiente ---------- */
@@ -199,7 +202,10 @@
     padding:8vh 7vw; text-align:center;
     opacity:0; pointer-events:none;
     transition:opacity 1.1s ease;
-    overflow-y:auto;
+    overflow-y:auto; -webkit-overflow-scrolling:touch;
+    /* 100dvh sigue a la barra del navegador; sin el, el final queda debajo de ella */
+    height:100dvh;
+    padding-bottom:max(8vh, env(safe-area-inset-bottom));
     /* ninguna escena debe poder dejar su boton fuera de alcance */
     justify-content:safe center;
   }
@@ -215,6 +221,8 @@
     font-family:'Inter',sans-serif; font-size:.78rem; font-weight:300;
     letter-spacing:.32em; text-transform:uppercase;
     cursor:pointer; overflow:hidden;
+    max-width:100%;
+    -webkit-tap-highlight-color:transparent;
     transition:color .4s ease, border-color .4s ease, box-shadow .5s ease, transform .4s ease;
   }
   .boton::before{
@@ -222,12 +230,21 @@
     background:radial-gradient(circle at 50% 120%, rgba(255,210,74,.35), transparent 70%);
     opacity:0; transition:opacity .5s ease;
   }
-  .boton:hover{
-    color:#fff6d4; border-color:var(--amarillo);
-    box-shadow:0 0 40px rgba(255,210,74,.22), inset 0 0 24px rgba(255,210,74,.08);
-    transform:translateY(-2px);
+  @media (hover:hover){
+    .boton:hover{
+      color:#fff6d4; border-color:var(--amarillo);
+      box-shadow:0 0 40px rgba(255,210,74,.22), inset 0 0 24px rgba(255,210,74,.08);
+      transform:translateY(-2px);
+    }
+    .boton:hover::before{opacity:1}
   }
-  .boton:hover::before{opacity:1}
+  /* en el movil la respuesta llega al tocar, no al pasar por encima */
+  .boton:active{
+    color:#fff6d4; border-color:var(--amarillo);
+    box-shadow:0 0 30px rgba(255,210,74,.2);
+    transform:scale(.97);
+  }
+  .boton:active::before{opacity:1}
   .boton span{position:relative}
 
   .pulso{
@@ -238,7 +255,7 @@
   }
   @keyframes pulsar{
     0%{transform:scale(1); opacity:.5}
-    70%{transform:scale(1.22); opacity:0}
+    70%{transform:scale(var(--pulso-max,1.22)); opacity:0}
     100%{opacity:0}
   }
 
@@ -512,6 +529,9 @@
   }
   .ranura.abierta{opacity:1}
 
+  /* en pantallas estrechas las tres grandes se juntan para caber sin encogerse */
+  .jardin > .flor{margin-inline:var(--solape,0px)}
+
   /* --- animación de la flor --- */
   /* --largo es cuanto se ha estirado el tallo; registrarlo permite animarlo */
   @property --largo{syntax:'<number>'; inherits:true; initial-value:1}
@@ -578,6 +598,81 @@
     50% {transform:rotate(0deg)}
     75% {transform:rotate(-1.6deg)}
     100%{transform:rotate(0deg)}
+  }
+
+
+  /* El puente es la escena mas densa del mensaje: cinco parrafos seguidos mas el
+     boton. Es la unica que no cabe ni en escritorio, asi que aprieta los margenes
+     y mide su texto tambien contra el alto (dvh), no solo contra el ancho. */
+  #puente .carta-fin p{
+    font-size:clamp(.92rem,min(3vw,3.4dvh),1.85rem) !important;
+    line-height:1.64 !important;
+    margin-top:.9rem !important;
+  }
+  #puente .carta-fin p:first-child{margin-top:0 !important}
+  #puente .amanecer-txt{font-size:clamp(1rem,min(3.6vw,3.9dvh),2.1rem) !important}
+  #puente .zona-boton{margin-top:1.5rem}
+
+
+  /* ==================== movil ====================
+     pantallas estrechas: menos margenes, marcos mas bajos, botones que caben
+     de ancho y texto medido tambien contra el alto, no solo contra el ancho. */
+  @media (max-width:720px){
+    .escena{
+      padding:5vh 5vw;
+      padding-bottom:max(5vh, env(safe-area-inset-bottom));
+      gap:1rem;
+    }
+
+    /* el boton mas estrecho: "Me equivoque de boton" no cabia en 360px */
+    .boton{
+      padding:.95rem 1.6rem;
+      font-size:.7rem; letter-spacing:.16em;
+    }
+    .zona-boton{margin-top:2rem; gap:.7rem; width:100%}
+    /* el boton ocupa casi todo el ancho: un aro al 1.22 se salia por los lados */
+    .pulso{--pulso-max:1.05}
+    .zona-boton .boton{flex:1 1 auto; min-width:min(15rem,100%)}
+
+    .carta-fin p{font-size:clamp(1.05rem,4.4vw,1.5rem); line-height:1.7}
+    .aparte{
+      margin-top:1.4rem;
+      font-size:.68rem !important; letter-spacing:.18em; line-height:1.9 !important;
+    }
+    .grito{margin-top:1rem; font-size:clamp(2.2rem,12vw,3.4rem) !important}
+    .amanecer-txt{margin-top:1.2rem; font-size:clamp(1.15rem,5.4vw,1.7rem)}
+    .pie-gif{font-size:clamp(1rem,4.2vw,1.3rem)}
+    .final{font-size:clamp(1.9rem,9.4vw,3rem)}
+    .final::before,.final::after{margin:1.4rem auto}
+    .saludo-linea{font-size:clamp(1.6rem,8.4vw,2.8rem)}
+
+    /* los marcos mandan sobre el alto disponible, no sobre un maximo fijo */
+    .marco{width:min(58vw,210px)}
+    .marco.ancho{height:min(28dvh,220px); max-width:90vw}
+    .marco.ancho img{max-width:90vw}
+    .marco.ancho:not(.con-foto){width:min(70vw,240px)}
+    #adios .marco.ancho{height:min(22dvh,180px)}
+    .marco .hueco{font-size:.58rem; letter-spacing:.16em; line-height:1.7; padding:1rem; gap:.5rem}
+
+    #epilogo{gap:1.4rem; padding:4vh 5vw 8vh}
+    #hablar,#euforia,#adios,#puente{gap:1rem; padding:4vh 5vw 5vh}
+    .fila-fin{gap:1.2rem}
+
+    /* los desenfoques a pantalla completa son caros en movil */
+    .rayos{filter:blur(4px)}
+    .cesped.tras{filter:blur(.7px) brightness(.72)}
+    .cesped.frente{filter:blur(.5px) brightness(.42)}
+  }
+
+  /* pantallas bajas (movil en horizontal, ventanas cortas) */
+  @media (max-height:560px){
+    .escena{padding:3vh 5vw; gap:.7rem}
+    .marco{width:min(34vw,150px)}
+    .marco.ancho{height:min(34dvh,170px)}
+    #adios .marco.ancho{height:min(30dvh,150px)}
+    .zona-boton{margin-top:1.2rem}
+    .grito{font-size:clamp(1.8rem,7vw,2.6rem) !important; margin-top:.6rem}
+    .carta-fin p{font-size:clamp(.95rem,2.6vw,1.25rem); line-height:1.55}
   }
 
   @media (prefers-reduced-motion:reduce){
@@ -927,10 +1022,19 @@
     jardin.innerHTML = '';
     ranuras = [];
 
-    const lado = () => {
+    // en pantallas estrechas sobran flores: casi todas caian fuera de la vista
+    const porLado = innerWidth < 720 ? 4 : 6;
+
+    // los dos lados usan las mismas alturas (espejadas): asi pesan igual y las
+    // tres grandes quedan centradas de verdad, no empujadas hacia un lado
+    const base = innerWidth < 720 ? 84 : 100;
+    const alturas = Array.from({ length: porLado }, () => base + Math.random() * 60);
+
+    const lado = espejo => {
       const grupo = [];
-      for (let i = 0; i < 6; i++) {
-        const alto = 100 + Math.random() * 60;
+      const serie = espejo ? [...alturas].reverse() : alturas;
+      for (let i = 0; i < porLado; i++) {
+        const alto = serie[i];
         const f = girasol({
           alto,
           petalos: 12 + Math.floor(Math.random() * 4),
@@ -947,23 +1051,62 @@
       return grupo;
     };
 
-    lado().forEach(r => jardin.appendChild(r));
+    lado(false).forEach(r => jardin.appendChild(r));
     GRANDES.forEach(cfg => {
       const f = girasol(cfg);
       f.classList.add('mayor');
       jardin.appendChild(f);
     });
-    lado().forEach(r => jardin.appendChild(r));
+    lado(true).forEach(r => jardin.appendChild(r));
 
     medirEscala();
   }
 
   function medirEscala() {
-    const k = Math.min(1, (innerHeight * 0.74) / 440);
-    jardin.style.setProperty('--k', k.toFixed(3));
+    // En movil las tres grandes no caben de ancho a tamano completo. Encogerlas
+    // hasta que quepan las deja diminutas, asi que primero se juntan un poco
+    // -- como en un campo de verdad -- y solo despues se escala lo que falte.
+    const anchoGrandes = GRANDES.reduce((t, c) => t + c.alto * 0.62, 0);
+    jardin.style.setProperty('--solape',
+      innerWidth < 720 ? (-anchoGrandes * 0.05).toFixed(1) + 'px' : '0px');
+
+    let k = Math.min(1, (innerHeight * 0.74) / 440);
+
+    // Lo que ocupan de verdad no se calcula, se mide sobre el jardin dibujado.
+    // Hay que hacerlo a escala 1 y con la transicion apagada: si no, se lee la
+    // escala anterior (el transform tarda 2.6s en llegar) y sale mal.
+    const mayores = jardin.querySelectorAll('.flor.mayor');
+    if (mayores.length) {
+      const transicion = jardin.style.transition;
+      jardin.style.transition = 'none';
+      jardin.style.setProperty('--k', '1');
+
+      let izq = Infinity, der = -Infinity;
+      mayores.forEach(f => {
+        const r = f.getBoundingClientRect();
+        izq = Math.min(izq, r.left); der = Math.max(der, r.right);
+      });
+      const ocupa = der - izq, cabe = innerWidth * 0.94;   // margen para el vaiven del viento
+      if (ocupa > cabe) k = Math.min(k, cabe / ocupa);
+
+      jardin.style.setProperty('--k', k.toFixed(3));
+      void jardin.offsetWidth;              // asienta el cambio antes de devolver la transicion
+      jardin.style.transition = transicion;
+    } else {
+      jardin.style.setProperty('--k', k.toFixed(3));
+    }
+
     jardin.style.setProperty('--kmin', (k * (innerWidth < 720 ? 0.26 : 0.32)).toFixed(3));
   }
   addEventListener('resize', medirEscala);
+
+  // al girar el movil cambia cuantas flores caben: se vuelve a sembrar el campo
+  let anchoPrevio = innerWidth;
+  addEventListener('resize', () => {
+    const cruzaElCorte = (anchoPrevio < 720) !== (innerWidth < 720);
+    anchoPrevio = innerWidth;
+    if (cruzaElCorte && !jardin.querySelector('.flor.abrir')) sembrar();
+  });
 
   /* ============ utilidades de escena ============ */
   const escenas = ['#intro', '#saludo', '#leyenda', '#carta', '#epilogo', '#cierre',
