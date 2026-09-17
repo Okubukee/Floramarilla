@@ -527,6 +527,18 @@
     line-height:2.2 !important;
   }
 
+  /* un aparte de varias lineas no se puede leer con el tracking de titular ni
+     en minusculas forzadas: mantiene el tono discreto, pero recupera tamano,
+     puntuacion visible, color y una medida corta de linea */
+  .aparte.largo{
+    max-width:54ch; margin-inline:auto; margin-top:2.2rem;
+    font-family:'Cormorant Garamond',serif; font-weight:300;
+    font-size:clamp(1.02rem,2.3vw,1.24rem) !important;
+    letter-spacing:.012em; text-transform:none;
+    color:#d2cbbc; line-height:1.9 !important;
+    text-wrap:pretty;
+  }
+
   .carta-fin{max-width:760px}
   .carta-fin p{
     font-family:'Cormorant Garamond',serif; font-weight:300;
@@ -549,6 +561,7 @@
     pointer-events:none;
   }
   .jardin{
+    position:relative;
     display:flex; align-items:flex-end; justify-content:center;
     transform-origin:bottom center;
     transform:scale(var(--k,1));
@@ -573,6 +586,14 @@
     opacity:0; transition:opacity .9s ease;
   }
   .ranura.abierta{opacity:1}
+
+  /* fila de delante: girasoles pequenos plantados por delante de las tres grandes.
+     Va en absoluto para no abrir hueco en el flex ni mover el resto del jardin. */
+  .delantera{
+    position:absolute; bottom:0; left:50%; transform:translateX(-50%);
+    display:flex; align-items:flex-end; justify-content:space-around;
+    pointer-events:none;
+  }
 
   /* en pantallas estrechas las tres grandes se juntan para caber sin encogerse */
   .jardin > .flor{margin-inline:var(--solape,0px)}
@@ -684,6 +705,11 @@
       margin-top:1.4rem;
       font-size:.68rem !important; letter-spacing:.18em; line-height:1.9 !important;
     }
+    .aparte.largo{
+      margin-top:1.6rem;
+      font-size:clamp(1rem,4.1vw,1.16rem) !important;
+      letter-spacing:.008em; line-height:1.8 !important;
+    }
     .grito{margin-top:1rem; font-size:clamp(2.2rem,12vw,3.4rem) !important}
     .amanecer-txt{margin-top:1.2rem; font-size:clamp(1.15rem,5.4vw,1.7rem)}
     .pie-gif{font-size:clamp(1rem,4.2vw,1.3rem)}
@@ -724,6 +750,40 @@
 
   @media (prefers-reduced-motion:reduce){
     .flor.viento{animation:none}
+  }
+
+  /* ---------- mensaje emergente: los pensamientos de la flor ---------- */
+  .pensamientos{
+    position:fixed; inset:0; z-index:80;
+    display:flex; align-items:center; justify-content:safe center;
+    padding:6vh 6vw; overflow-y:auto;
+    background:rgba(4,6,9,.62); backdrop-filter:blur(7px);
+    opacity:0; transition:opacity .5s ease;
+  }
+  .pensamientos[hidden]{display:none}
+  .pensamientos.on{opacity:1}
+  .pensamientos .nota{
+    max-width:min(34rem,100%);
+    display:flex; flex-direction:column; align-items:center; gap:1.5rem;
+    padding:2.6rem 2.4rem;
+    background:linear-gradient(160deg, rgba(20,17,12,.94), rgba(10,10,12,.94));
+    border:1px solid rgba(255,210,74,.3); border-radius:1.4rem;
+    box-shadow:0 0 60px rgba(255,210,74,.12), inset 0 0 40px rgba(255,210,74,.04);
+    transform:translateY(14px) scale(.97);
+    transition:transform .6s cubic-bezier(.2,.8,.3,1);
+  }
+  .pensamientos.on .nota{transform:none}
+  .pensamientos h3{
+    margin:0; color:var(--amarillo);
+    font-family:'Inter',sans-serif; font-size:.72rem; font-weight:300;
+    letter-spacing:.34em; text-transform:uppercase;
+  }
+  .pensamientos p{
+    margin:0; text-align:center; text-wrap:balance;
+    color:#efe6d4; font-size:clamp(1rem,2.6vw,1.15rem); line-height:1.8;
+  }
+  @media (max-width:520px){
+    .pensamientos .nota{padding:2rem 1.5rem; gap:1.2rem}
   }
 
   /* ---------- musica: chapa con ecualizador, nombre y volumen ---------- */
@@ -858,19 +918,19 @@
 
 <!-- ESCENA 0 -->
 <section class="escena activa" id="intro">
-  <p class="semilla-intro">hay algo que quiero mostrarte</p>
+  <p class="semilla-intro">Hay algo que quiero mostrarte</p>
   <button class="boton" id="btnEmpezar"><span>Comenzar</span><i class="pulso"></i></button>
 </section>
 
 <!-- ESCENA 1 -->
 <section class="escena" id="saludo">
   <h1 class="saludo-linea" id="linea1"></h1>
-  <p class="subsaludo" id="subsaludo">te dejo esto aquí</p>
+  <p class="subsaludo" id="subsaludo">Y que lo disfrutes mucho</p>
 </section>
 
 <!-- ESCENA 2 -->
 <section class="escena" id="leyenda">
-  <p class="leyenda-txt">y que algo bueno crezca donde estés</p>
+  <p class="leyenda-txt">Abundancia, salud, felicidad y crecimiento es lo que mas te deseo en donde sea que estés.</p>
 </section>
 
 <!-- ESCENA 3 -->
@@ -904,9 +964,10 @@
     <p class="rev" id="e1">Sé que quizás esto no tenga mucho valor para ti,
       por eso pensé en hacerte esta flor a mano,
       porque creo que es algo que sí te hubiera sacado una sonrisa
-      y adoro tu sonrisa.</p>
+      y de verdad que adoro tu sonrisa.</p>
 
     <div class="zona-boton rev" id="e4">
+      <button class="boton tenue" id="btnPensamientos" aria-haspopup="dialog"><span>Leer pensamientos</span></button>
       <button class="boton" id="btnContinuar2"><span>Continuar</span><i class="pulso"></i></button>
     </div>
   </div>
@@ -959,21 +1020,25 @@
 <!-- ESCENA 6a-medio: lo que quiero decir -->
 <section class="escena" id="puente">
   <div class="carta-fin">
-    <p class="rev" id="p1">Creo que los problemas que tuvimos todos tienen solución,
-      y esto no es para volver a ser pareja.</p>
+    <p class="rev" id="p1">Creo que los problemas que tuvimos todos tienen solución y se que quizas
+      las cosas no sean las mismas pero no planeo que lo sean.
+    </p>
 
-    <p class="rev" id="p2" style="margin-top:1.4rem">Sinceramente, me gustaría que,
-      si se diera la ocasión, pudiéramos volver a conectar de forma natural,
-      sin añadir ninguna presión en el proceso.</p>
+    <p class="rev" id="p2" style="margin-top:1.4rem">
+      Quiero hacer las cosas bien aunque tome mas tiempo, sin presiones, ni arrepentimientos y pura decision.
+      Conocerte de 0 sin olvidar el pasado y responsabilizandome sin huir de las situaciones.
+    </p>
 
-    <p class="amanecer-txt rev" id="p3">Tengo sentimientos cálidos cuando pienso en ti.</p>
+    <p class="amanecer-txt rev" id="p3">No te puedo mentir de mis intenciones y tampoco de mis sentimientos</p>
 
-    <p class="rev" id="p4" style="margin-top:2rem">Simplemente quiero poder retomar algo de contacto
-      y hacer las cosas bien, como para que puedas contarlo con una sonrisa.</p>
+    <p class="rev" id="p4" style="margin-top:2rem">
+      Se que no hay un lugar para mi ahora pero espero construir un lugar mas comodo
+      en el que el unico frio que sientas, sea cuando vayamos a Londres, Paris o cualquier otro pais.
+      Solo quiero tiempo para construir algo que realmente dure y no se vuelva a desmoronar.</p>
 
     <p class="rev" id="p5" style="margin-top:1.4rem">Realmente te mereces mis disculpas
-      por una infinidad de cosas, pero ahora no es el momento para ello. Aunque tambien
-      quiero agradecerte por todo, me di cuenta tarde que me equivoque en muchas cosas.</p>
+      por una infinidad de cosas. Aunque tambien muchos agradecimientos por todo, me di cuenta 
+      tarde que me equivoque en muchas cosas y que debi escucharte mas.</p>
 
     <div class="zona-boton rev" id="p6">
       <button class="boton" id="btnContinuar4"><span>Continuar</span><i class="pulso"></i></button>
@@ -999,7 +1064,12 @@
 
     <p class="grito rev" id="g2">GRACIAS</p>
 
-    <p class="aparte rev" id="g3">Gracias a Jesus, Gracias a las Energias, Gracias a los Libros, Gracias a Ti y en paz con el universo al fin.</p>
+    <p class="aparte largo rev" id="g3">Sinceramente tuve una gran dualidad en mis pensamientos:
+      quiero respetarte en todo momento, pero eres la única persona a la que quiero regalarle una flor.
+      Quiero seguir haciendo cambios en mi vida y de corazón me gustaría que estuvieras presente y,
+      si fuera posible, escuchar las palabras que tengas para regalarme, y esta vez no faltar
+      a ninguna promesa.
+    </p>
 
     <div class="zona-boton rev" id="g4">
       <button class="boton tenue" id="btnRepetir3"><span>Verlo otra vez</span></button>
@@ -1035,6 +1105,16 @@
     </div>
   </div>
 </section>
+
+<!-- lo que pensaba mientras la hacia: se abre desde el epilogo -->
+<div class="pensamientos" id="pensamientos" role="dialog" aria-modal="true"
+     aria-labelledby="pensamientosTitulo" hidden>
+  <div class="nota">
+    <h3 id="pensamientosTitulo">Pensamientos</h3>
+    <p>No estuvo mal la experiencia y sinceramente me gustaria poder dedicarte mas cosas asi. Esta es mi primera flor y es para ti Estela</p>
+    <button class="boton tenue" id="btnCerrarPensamientos"><span>Cerrar</span></button>
+  </div>
+</div>
 
 <!-- la musica: en bucle y arrancada por el primer toque del visitante -->
 <audio id="musica" src="musica.mp3" loop preload="auto"></audio>
@@ -1219,6 +1299,30 @@
       jardin.appendChild(f);
     });
     lado(true).forEach(r => jardin.appendChild(r));
+
+    // por delante de las tres grandes, a sus pies, otra tanda de pequenos:
+    // ocupan justo lo que miden las grandes para repartirse a lo ancho de ellas
+    const delante = document.createElement('div');
+    delante.className = 'delantera';
+    delante.style.width =
+      Math.round(GRANDES.reduce((t, c) => t + c.alto * 0.62, 0)) + 'px';
+    const enFrente = innerWidth < 720 ? 4 : 5;
+    for (let i = 0; i < enFrente; i++) {
+      const alto = (innerWidth < 720 ? 92 : 112) + Math.random() * 46;
+      const f = girasol({
+        alto,
+        petalos: 12 + Math.floor(Math.random() * 4),
+        curva: (Math.random() - .5) * 46,
+        retraso: 0
+      });
+      const r = document.createElement('span');
+      r.className = 'ranura';
+      r.style.width = Math.round(alto * 0.62 * 0.92) + 'px';
+      r.appendChild(f);
+      delante.appendChild(r);
+      ranuras.push(r);
+    }
+    jardin.appendChild(delante);
 
     medirEscala();
   }
@@ -1566,9 +1670,30 @@
 
   // quitar un boton del HTML tampoco debe dejar sin escuchar a los demas
   const alPulsar = (sel, fn) => { const e = $(sel); if (e) e.addEventListener('click', fn); };
+  /* los pensamientos: emergen sobre la escena y se cierran sin tocar el relato */
+  const notaPens = $('#pensamientos');
+  const abrirPensamientos = () => {
+    notaPens.hidden = false;
+    void notaPens.offsetWidth;            // asienta el display antes de la transicion
+    notaPens.classList.add('on');
+    $('#btnCerrarPensamientos').focus();
+  };
+  const cerrarPensamientos = () => {
+    if (notaPens.hidden) return;
+    notaPens.classList.remove('on');
+    setTimeout(() => { notaPens.hidden = true; }, 500);
+    const b = $('#btnPensamientos');
+    if (b) b.focus();
+  };
+  // el fondo cierra; la nota no, para poder seleccionar el texto
+  notaPens.addEventListener('click', e => { if (e.target === notaPens) cerrarPensamientos(); });
+  addEventListener('keydown', e => { if (e.key === 'Escape') cerrarPensamientos(); });
+
+  alPulsar('#btnPensamientos', abrirPensamientos);
+  alPulsar('#btnCerrarPensamientos', cerrarPensamientos);
   alPulsar('#btnEmpezar', reproducir);
   alPulsar('#btnContinuar', epilogo);
-  alPulsar('#btnContinuar2', cierre);
+  alPulsar('#btnContinuar2', () => { cerrarPensamientos(); cierre(); });
   alPulsar('#btnContinuar3', puente);
   alPulsar('#btnContinuar4', euforia);
   alPulsar('#btnUpsi', hablar);
