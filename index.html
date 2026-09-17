@@ -725,6 +725,108 @@
   @media (prefers-reduced-motion:reduce){
     .flor.viento{animation:none}
   }
+
+  /* ---------- musica: chapa con ecualizador, nombre y volumen ---------- */
+  .sonido{
+    position:fixed; z-index:70;
+    left:max(1.1rem, env(safe-area-inset-left));
+    top:max(1.1rem, env(safe-area-inset-top));
+    display:flex; align-items:center; gap:.7rem;
+    padding:.5rem .95rem .5rem .8rem;
+    background:rgba(6,8,10,.34); backdrop-filter:blur(6px);
+    border:1px solid rgba(255,210,74,.28); border-radius:999px;
+    max-width:calc(100vw - 2.2rem);
+    opacity:0; pointer-events:none; transform:translateY(-8px);
+    transition:opacity 1.2s ease, transform 1.2s ease, border-color .4s ease, box-shadow .5s ease;
+  }
+  .sonido.visible{opacity:.72; pointer-events:auto; transform:none}
+  .sonido:hover, .sonido:focus-within{opacity:1; border-color:rgba(255,210,74,.55); box-shadow:0 0 22px rgba(255,210,74,.18)}
+
+  /* la mitad izquierda (barras + nombre) es el boton de apagar y encender */
+  .sonido .cabeza{
+    display:flex; align-items:center; gap:.6rem; min-width:0;
+    background:none; border:0; padding:0; text-align:left;
+    cursor:pointer; -webkit-tap-highlight-color:transparent;
+  }
+
+  .sonido .barras{
+    display:flex; align-items:flex-end; gap:3px;
+    height:15px; flex:none;
+  }
+  .sonido i{
+    display:block; width:3px; height:30%;
+    background:linear-gradient(180deg,var(--amarillo),var(--amarillo-hondo));
+    border-radius:2px; transform-origin:50% 100%;
+    animation:baile 1.1s ease-in-out infinite alternate;
+  }
+  .sonido i:nth-child(1){animation-duration:.86s}
+  .sonido i:nth-child(2){animation-duration:1.24s; animation-delay:-.3s}
+  .sonido i:nth-child(3){animation-duration:.98s; animation-delay:-.6s}
+  .sonido i:nth-child(4){animation-duration:1.4s;  animation-delay:-.15s}
+
+  @keyframes baile{ from{transform:scaleY(.35)} to{transform:scaleY(2.6)} }
+
+  /* el nombre en dos lineas: cancion arriba, grupo debajo y mas apagado */
+  .sonido .pista{
+    display:flex; flex-direction:column; gap:.1rem; min-width:0;
+  }
+  .sonido .pista b, .sonido .pista em{
+    font-family:'Inter',sans-serif; font-style:normal; font-weight:300;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .sonido .pista b{
+    font-size:.68rem; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--amarillo); transition:color .4s ease;
+  }
+  .sonido .pista em{
+    font-size:.58rem; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--tenue);
+  }
+
+  /* ---- volumen ---- */
+  .sonido .volumen{
+    -webkit-appearance:none; appearance:none;
+    flex:none; width:72px; height:14px; margin:0;
+    padding-left:.7rem; border-left:1px solid rgba(255,210,74,.16);
+    background:transparent; cursor:pointer;
+  }
+  .sonido .volumen:focus-visible{outline:1px solid rgba(255,210,74,.5); outline-offset:4px; border-radius:4px}
+
+  /* el carril y el tirador van por separado en cada motor: no hay forma comun */
+  .sonido .volumen::-webkit-slider-runnable-track{
+    height:2px; border-radius:2px; background:rgba(255,210,74,.22);
+  }
+  .sonido .volumen::-webkit-slider-thumb{
+    -webkit-appearance:none; width:9px; height:9px; margin-top:-3.5px;
+    border-radius:50%; background:var(--amarillo);
+    box-shadow:0 0 8px rgba(255,210,74,.55);
+    transition:transform .3s ease;
+  }
+  .sonido .volumen:hover::-webkit-slider-thumb{transform:scale(1.25)}
+  .sonido .volumen::-moz-range-track{
+    height:2px; border-radius:2px; background:rgba(255,210,74,.22);
+  }
+  .sonido .volumen::-moz-range-thumb{
+    width:9px; height:9px; border:0; border-radius:50%;
+    background:var(--amarillo); box-shadow:0 0 8px rgba(255,210,74,.55);
+  }
+
+  /* callada: las barras se quedan planas y la chapa se apaga */
+  .sonido.muda i{animation-play-state:paused; transform:scaleY(.3); opacity:.45}
+  .sonido.muda{border-color:rgba(255,255,255,.16)}
+  .sonido.muda .pista b{color:var(--tenue)}
+
+  @media (max-width:520px){
+    .sonido{gap:.55rem; padding:.42rem .8rem .42rem .7rem}
+    .sonido .cabeza{gap:.5rem}
+    .sonido .barras{height:13px; gap:2.5px}
+    .sonido .pista b{font-size:.6rem; letter-spacing:.1em}
+    .sonido .pista em{font-size:.52rem; letter-spacing:.14em}
+    .sonido .volumen{width:52px; padding-left:.55rem}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .sonido i{animation:none; transform:scaleY(1.2)}
+  }
 </style>
 </head>
 <body>
@@ -933,6 +1035,17 @@
     </div>
   </div>
 </section>
+
+<!-- la musica: en bucle y arrancada por el primer toque del visitante -->
+<audio id="musica" src="musica.mp3" loop preload="auto"></audio>
+<div class="sonido" id="chapa">
+  <button class="cabeza" id="btnSonido" aria-label="Silenciar la musica">
+    <span class="barras"><i></i><i></i><i></i><i></i></span>
+    <span class="pista"><b>Do I Wanna Know?</b><em>Arctic Monkeys</em></span>
+  </button>
+  <input class="volumen" id="volumen" type="range" min="0" max="100" value="55"
+         aria-label="Volumen de la musica">
+</div>
 
 <script>
 (() => {
@@ -1371,6 +1484,84 @@
     $('#cielo').classList.remove('alba');
     ocultarTodo();
     setTimeout(reproducir, 900);
+  }
+
+  /* ============ musica ============ */
+  // El navegador no deja sonar nada hasta que la persona toca algo, asi que la
+  // musica espera al primer gesto (normalmente el boton de Comenzar) y a partir
+  // de ahi va en bucle: el atributo loop mas un rearranque por si el navegador
+  // corta el ciclo en algun movil.
+  const audio = $('#musica'), chapa = $('#chapa'), btnSonido = $('#btnSonido'), barra = $('#volumen');
+  // el volumen que pide la persona; el fundido va hacia el, no hacia un fijo
+  let VOLUMEN = (barra ? +barra.value : 55) / 100;
+  let sonando = false, fundido = null;
+
+  function fundir(hasta, ms, alAcabar) {
+    clearInterval(fundido);
+    const desde = audio.volume, pasos = Math.max(1, Math.round(ms / 50));
+    let i = 0;
+    fundido = setInterval(() => {
+      i++;
+      audio.volume = Math.min(1, Math.max(0, desde + (hasta - desde) * (i / pasos)));
+      if (i >= pasos) { clearInterval(fundido); if (alAcabar) alAcabar(); }
+    }, 50);
+  }
+
+  function arrancarMusica() {
+    if (!audio || sonando) return;
+    audio.volume = 0;
+    const intento = audio.play();
+    if (!intento) return;
+    intento.then(() => {
+      sonando = true;
+      chapa.classList.add('visible');
+      chapa.classList.remove('muda');
+      fundir(VOLUMEN, 2600);
+    }).catch(() => { /* sin gesto valido todavia: ya lo pillara el siguiente */ });
+  }
+
+  if (audio) {
+    // el bucle de verdad: si el navegador ignora loop, se vuelve a empezar
+    audio.addEventListener('ended', () => { audio.currentTime = 0; audio.play().catch(() => {}); });
+
+    // cualquier primer toque sirve, no solo el boton de Comenzar
+    ['pointerdown', 'keydown', 'touchstart'].forEach(ev =>
+      addEventListener(ev, arrancarMusica, { once: false, passive: true }));
+
+    btnSonido.addEventListener('click', e => {
+      e.stopPropagation();
+      if (!sonando) { arrancarMusica(); return; }
+      const reanudar = audio.paused;
+      if (reanudar) {
+        audio.play().catch(() => {});
+        chapa.classList.remove('muda');
+        fundir(VOLUMEN, 900);
+      } else {
+        // se apaga el volumen antes de parar: cortar en seco se nota mucho
+        fundir(0, 700, () => audio.pause());
+        chapa.classList.add('muda');
+      }
+      btnSonido.setAttribute('aria-label', reanudar ? 'Silenciar la musica' : 'Poner la musica');
+    });
+
+    if (barra) {
+      // mover la barra manda sobre cualquier fundido a medias
+      barra.addEventListener('input', () => {
+        VOLUMEN = +barra.value / 100;
+        clearInterval(fundido);
+        audio.volume = VOLUMEN;
+        // subir el volumen con la musica parada es pedir que vuelva a sonar
+        if (VOLUMEN > 0 && sonando && audio.paused) {
+          audio.play().catch(() => {});
+          chapa.classList.remove('muda');
+          btnSonido.setAttribute('aria-label', 'Silenciar la musica');
+        }
+        // dejarla en cero equivale a callarla, y la chapa lo refleja
+        chapa.classList.toggle('muda', VOLUMEN === 0 || audio.paused);
+      });
+      // el arrastre dentro de la chapa no debe contar como toque para nada mas
+      barra.addEventListener('pointerdown', e => e.stopPropagation());
+    }
   }
 
   // quitar un boton del HTML tampoco debe dejar sin escuchar a los demas
