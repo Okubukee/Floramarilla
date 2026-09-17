@@ -268,28 +268,35 @@
     cursor:pointer; overflow:hidden;
     max-width:100%;
     -webkit-tap-highlight-color:transparent;
-    transition:color .4s ease, border-color .4s ease, box-shadow .5s ease, transform .4s ease;
+    transition:color .45s ease, border-color .45s ease, box-shadow .5s ease, transform .45s ease;
   }
   .boton::before{
     content:''; position:absolute; inset:0;
     background:radial-gradient(circle at 50% 120%, rgba(255,210,74,.35), transparent 70%);
-    opacity:0; transition:opacity .5s ease;
+    opacity:0; transition:opacity .45s ease;
   }
   @media (hover:hover){
     .boton:hover{
       color:#fff6d4; border-color:var(--amarillo);
       box-shadow:0 0 40px rgba(255,210,74,.22), inset 0 0 24px rgba(255,210,74,.08);
       transform:translateY(-2px);
+      /* al entrar responde ya; al salir vuelve despacio con la regla de arriba */
+      transition:color .12s ease-out, border-color .12s ease-out, box-shadow .16s ease-out, transform .14s ease-out;
     }
-    .boton:hover::before{opacity:1}
+    .boton:hover::before{opacity:1; transition:opacity .16s ease-out}
+    .boton.tenue:hover{
+      color:var(--amarillo); border-color:rgba(255,210,74,.5);
+      box-shadow:0 0 26px rgba(255,210,74,.14);
+    }
   }
   /* en el movil la respuesta llega al tocar, no al pasar por encima */
   .boton:active{
     color:#fff6d4; border-color:var(--amarillo);
     box-shadow:0 0 30px rgba(255,210,74,.2);
     transform:scale(.97);
+    transition:color .08s ease-out, border-color .08s ease-out, box-shadow .1s ease-out, transform .08s ease-out;
   }
-  .boton:active::before{opacity:1}
+  .boton:active::before{opacity:1; transition:opacity .1s ease-out}
   .boton span{position:relative}
 
   .pulso{
@@ -394,11 +401,6 @@
   .boton.tenue{
     color:var(--tenue); border-color:rgba(138,132,121,.35);
   }
-  .boton.tenue:hover{
-    color:var(--amarillo); border-color:rgba(255,210,74,.5);
-    box-shadow:0 0 26px rgba(255,210,74,.14);
-  }
-
   /* ---------- epílogo: la flor a mano ---------- */
   #epilogo{
     justify-content:center; gap:2.4rem;
@@ -800,7 +802,10 @@
     transition:opacity 1.2s ease, transform 1.2s ease, border-color .4s ease, box-shadow .5s ease;
   }
   .sonido.visible{opacity:.72; pointer-events:auto; transform:none}
-  .sonido:hover, .sonido:focus-within{opacity:1; border-color:rgba(255,210,74,.55); box-shadow:0 0 22px rgba(255,210,74,.18)}
+  .sonido:hover, .sonido:focus-within{
+    opacity:1; border-color:rgba(255,210,74,.55); box-shadow:0 0 22px rgba(255,210,74,.18);
+    transition:opacity .14s ease-out, border-color .14s ease-out, box-shadow .16s ease-out;
+  }
 
   /* la mitad izquierda (barras + nombre) es el boton de apagar y encender */
   .sonido .cabeza{
@@ -860,9 +865,9 @@
     -webkit-appearance:none; width:9px; height:9px; margin-top:-3.5px;
     border-radius:50%; background:var(--amarillo);
     box-shadow:0 0 8px rgba(255,210,74,.55);
-    transition:transform .3s ease;
+    transition:transform .25s ease;
   }
-  .sonido .volumen:hover::-webkit-slider-thumb{transform:scale(1.25)}
+  .sonido .volumen:hover::-webkit-slider-thumb{transform:scale(1.25); transition:transform .12s ease-out}
   .sonido .volumen::-moz-range-track{
     height:2px; border-radius:2px; background:rgba(255,210,74,.22);
   }
