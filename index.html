@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Flores Amarillas</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Inter:wght@200;300;400&display=swap" rel="stylesheet">
@@ -403,7 +404,8 @@
   }
   /* ---------- epílogo: la flor a mano ---------- */
   #epilogo{
-    justify-content:center; gap:2.4rem;
+    /* safe: si no cabe, empieza arriba en vez de cortar la foto por encima */
+    justify-content:safe center; gap:2.4rem;
     padding:6vh 7vw 22vh;
     overflow-y:auto;
   }
@@ -430,6 +432,8 @@
     position:relative;
     width:min(78vw,320px);
     aspect-ratio:3/4;
+    /* con overflow:hidden la columna flex podía aplastarlo y recortar la foto */
+    flex-shrink:0;
     border-radius:3px;
     background:#0c0a07;
     box-shadow:0 0 0 1px rgba(255,210,74,.22),
@@ -1031,16 +1035,17 @@
     </p>
 
     <p class="rev" id="p2" style="margin-top:1.4rem">
-      Quiero hacer las cosas bien aunque tome mas tiempo, sin presiones, ni arrepentimientos y pura decision.
-      Conocerte de 0 sin olvidar el pasado y responsabilizandome sin huir de las situaciones.
+      Quiero hacer las cosas bien y demostrarte que los cambios existen. Volver a ser un motivo de sonrisa
+      y no de dudas.
     </p>
 
-    <p class="amanecer-txt rev" id="p3">No te puedo mentir de mis intenciones y tampoco de mis sentimientos</p>
+    <p class="amanecer-txt rev" id="p3">No te puedo mentir de mis intenciones ni ocultarte mis emociones</p>
 
     <p class="rev" id="p4" style="margin-top:2rem">
-      Se que no hay un lugar para mi ahora pero espero construir un lugar mas comodo
-      en el que el unico frio que sientas, sea cuando vayamos a Londres, Paris o cualquier otro pais.
-      Solo quiero tiempo para construir algo que realmente dure y no se vuelva a desmoronar.</p>
+      Comencemos como desconocidos y permiteme construir un suelo que no manchen tus zapatos,
+      unas paredes que frenen el viento y un techo que nos proteja de la lluvia. Si vas a sentir frio
+      que sea en la cara cuando visitemos Londres, Paris o cualquier otro pais. Cualquier lugar si es
+      junto a ti sera mi favorito.</p>
 
     <p class="rev" id="p5" style="margin-top:1.4rem">Realmente te mereces mis disculpas
       por una infinidad de cosas. Aunque tambien muchos agradecimientos por todo, me di cuenta 
@@ -1070,11 +1075,10 @@
 
     <p class="grito rev" id="g2">GRACIAS</p>
 
-    <p class="aparte largo rev" id="g3">Sinceramente tuve una gran dualidad en mis pensamientos:
-      quiero respetarte en todo momento, pero eres la única persona a la que quiero regalarle una flor.
-      Quiero seguir haciendo cambios en mi vida y de corazón me gustaría que estuvieras presente y,
-      si fuera posible, escuchar las palabras que tengas para regalarme, y esta vez no faltar
-      a ninguna promesa.
+    <p class="aparte largo rev" id="g3">
+      Desde tu libertad quiero volver a ser alguien especial para ti, que puedas volverme a elegir y ante
+      todas las adversidades que puedan surgir poder ser un buen equipo. Eres la unica mujer a la 
+      que realmente deseo regalarle flores. De corazon quiero vivir juntos los cambios que nos depare la vida.
     </p>
 
     <div class="zona-boton rev" id="g4">
@@ -1099,8 +1103,11 @@
   </div>
 
   <div class="carta-fin">
-    <p class="rev" id="f1">Quizás no es el momento o simplemente es el fin,
-      de todas formas sabes dónde estoy y aunque no nos crucemos de vuelta.</p>
+    <p class="rev" id="f1">
+      No sabia si realmente el momento existia y tampoco quiero hacer que pierdas mucho tiempo. Gracias
+      por haberte tomado la molestia de dedicarme un poco de tiempo. No tengo intencion de manipularte
+      solo soy un hombre tonto que parece que sigue encantado por tu belleza.
+    </p>
 
     <p class="amanecer-txt rev" id="f2">Te deseo lo mejor.</p>
 
