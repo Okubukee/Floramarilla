@@ -15,7 +15,6 @@ El HTML espera estos ficheros junto a él:
 | `flor.jpg`      | la flor hecha a mano, en el epílogo |
 | `felicidad.gif` | escena "volver a hablar"          |
 | `euforia.gif`   | escena de agradecimiento          |
-| `fin.gif`       | escena de despedida               |
 
 Si alguno falta, su marco se queda vacío con un aviso en su sitio; el resto
 de la animación sigue funcionando.

@@ -281,13 +281,20 @@
       color:#fff6d4; border-color:var(--amarillo);
       box-shadow:0 0 40px rgba(255,210,74,.22), inset 0 0 24px rgba(255,210,74,.08);
       transform:translateY(-2px);
-      /* al entrar responde ya; al salir vuelve despacio con la regla de arriba */
-      transition:color .12s ease-out, border-color .12s ease-out, box-shadow .16s ease-out, transform .14s ease-out;
+      /* al entrar cambia en el acto; al salir vuelve despacio con la regla de arriba */
+      transition:none;
     }
-    .boton:hover::before{opacity:1; transition:opacity .16s ease-out}
+    .boton:hover::before{opacity:1; transition:none}
     .boton.tenue:hover{
       color:var(--amarillo); border-color:rgba(255,210,74,.5);
       box-shadow:0 0 26px rgba(255,210,74,.14);
+    }
+    /* en las escenas con fondo vivo la sombra de apoyo no debe tapar el brillo */
+    #hablar .boton:hover, #euforia .boton:hover{
+      box-shadow:0 0 40px rgba(255,210,74,.22), inset 0 0 24px rgba(255,210,74,.08), 0 2px 18px rgba(0,0,0,.45);
+    }
+    #hablar .boton.tenue:hover, #euforia .boton.tenue:hover{
+      box-shadow:0 0 26px rgba(255,210,74,.14), 0 2px 18px rgba(0,0,0,.45);
     }
   }
   /* en el movil la respuesta llega al tocar, no al pasar por encima */
@@ -295,9 +302,9 @@
     color:#fff6d4; border-color:var(--amarillo);
     box-shadow:0 0 30px rgba(255,210,74,.2);
     transform:scale(.97);
-    transition:color .08s ease-out, border-color .08s ease-out, box-shadow .1s ease-out, transform .08s ease-out;
+    transition:none;
   }
-  .boton:active::before{opacity:1; transition:opacity .1s ease-out}
+  .boton:active::before{opacity:1; transition:none}
   .boton span{position:relative}
 
   .pulso{
@@ -484,6 +491,16 @@
     to{opacity:1; filter:blur(0); transform:rotate(1.2deg) translateY(0) scale(1)}
   }
 
+  /* gif apaisado (500x226): aqui manda el ancho y el alto sale de la proporcion,
+     sin pasarse de --alto para que quepa el texto de debajo */
+  .marco.ancho.apaisado{
+    --alto:min(40vh,300px);
+    width:min(86vw, calc(var(--alto) * 500 / 226));
+    height:auto;
+    aspect-ratio:500/226;
+  }
+  .marco.ancho.apaisado img{width:100%; height:100%; max-width:none; object-fit:contain}
+
   .luz-marco{
     position:absolute; inset:0; pointer-events:none;
     background:linear-gradient(115deg,transparent 38%,rgba(255,255,255,.09) 48%,transparent 58%);
@@ -510,21 +527,6 @@
     filter:drop-shadow(0 0 40px rgba(255,200,70,.35));
   }
   .grito.on{animation:revelar 1.6s cubic-bezier(.2,.8,.3,1) forwards, brillo 7s linear infinite}
-
-  .fila-fin{
-    display:flex; align-items:flex-end; justify-content:center;
-    gap:clamp(1.4rem,5vw,3.4rem); flex-wrap:wrap;
-  }
-
-  /* en la despedida el gif va algo mas contenido */
-  #adios .marco.ancho{
-    height:min(34vh,252px);
-    transform:rotate(-1deg) translateY(26px) scale(.94);
-  }
-  #adios .marco.ancho.on{animation:revelarMarcoFin 1.8s cubic-bezier(.2,.8,.3,1) forwards}
-  @keyframes revelarMarcoFin{
-    to{opacity:1; filter:blur(0); transform:rotate(-1deg) translateY(0) scale(1)}
-  }
 
   .aparte{
     margin-top:2rem;
@@ -728,12 +730,11 @@
     .marco.ancho{height:min(28dvh,220px); max-width:90vw}
     .marco.ancho img{max-width:90vw}
     .marco.ancho:not(.con-foto){width:min(70vw,240px)}
-    #adios .marco.ancho{height:min(22dvh,180px)}
+    .marco.ancho.apaisado{--alto:min(28dvh,220px); width:min(90vw, calc(var(--alto) * 500 / 226))}
     .marco .hueco{font-size:.58rem; letter-spacing:.16em; line-height:1.7; padding:1rem; gap:.5rem}
 
     #epilogo{gap:1.4rem; padding:4vh 5vw 8vh}
     #hablar,#euforia,#adios,#puente{gap:1rem; padding:4vh 5vw 5vh}
-    .fila-fin{gap:1.2rem}
 
     /* los desenfoques a pantalla completa son caros en movil */
     .niebla{backdrop-filter:blur(2px) brightness(.74);
@@ -748,7 +749,7 @@
     .escena{padding:3vh 5vw; gap:.7rem}
     .marco{width:min(34vw,150px)}
     .marco.ancho{height:min(34dvh,170px)}
-    #adios .marco.ancho{height:min(30dvh,150px)}
+    .marco.ancho.apaisado{--alto:min(34dvh,170px)}
     .zona-boton{margin-top:1.2rem}
     .grito{font-size:clamp(1.8rem,7vw,2.6rem) !important; margin-top:.6rem}
     .carta-fin p{font-size:clamp(.95rem,2.6vw,1.25rem); line-height:1.55}
@@ -808,7 +809,7 @@
   .sonido.visible{opacity:.72; pointer-events:auto; transform:none}
   .sonido:hover, .sonido:focus-within{
     opacity:1; border-color:rgba(255,210,74,.55); box-shadow:0 0 22px rgba(255,210,74,.18);
-    transition:opacity .14s ease-out, border-color .14s ease-out, box-shadow .16s ease-out;
+    transition:none;
   }
 
   /* la mitad izquierda (barras + nombre) es el boton de apagar y encender */
@@ -871,7 +872,7 @@
     box-shadow:0 0 8px rgba(255,210,74,.55);
     transition:transform .25s ease;
   }
-  .sonido .volumen:hover::-webkit-slider-thumb{transform:scale(1.25); transition:transform .12s ease-out}
+  .sonido .volumen:hover::-webkit-slider-thumb{transform:scale(1.25); transition:none}
   .sonido .volumen::-moz-range-track{
     height:2px; border-radius:2px; background:rgba(255,210,74,.22);
   }
@@ -1061,7 +1062,7 @@
 <section class="escena" id="euforia">
 
   <!-- Para poner el gif: guardalo junto a este archivo como  euforia.gif -->
-  <div class="marco ancho" id="marcoGif2">
+  <div class="marco ancho apaisado" id="marcoGif2">
     <img id="gif2" src="euforia.gif" alt="">
     <div class="hueco">
       <b>tu gif aquí</b>
@@ -1089,18 +1090,6 @@
 
 <!-- ESCENA 6b: fin del mensaje -->
 <section class="escena" id="adios">
-
-  <div class="fila-fin">
-    <!-- Para poner el gif: guardalo junto a este archivo como  fin.gif -->
-    <div class="marco ancho" id="marcoGif3">
-      <img id="gif3" src="fin.gif" alt="">
-      <div class="hueco">
-        <b>tu gif aquí</b>
-        <span>guárdalo junto a este archivo como fin.gif</span>
-      </div>
-      <div class="luz-marco"></div>
-    </div>
-  </div>
 
   <div class="carta-fin">
     <p class="rev" id="f1">
@@ -1428,7 +1417,7 @@
     sembrar();
     escribirSaludo();
 
-    apagar(['#r2', '#r4', '#marco', '#e1', '#e4', '#c1', '#c2', '#c3', '#c4', '#h0', '#marcoGif', '#h1', '#h2', '#p1', '#p2', '#p3', '#p4', '#p5', '#p6', '#marcoGif2', '#g1', '#g2', '#g3', '#g4', '#marcoGif3', '#f1', '#f2', '#f3', '#f4']);
+    apagar(['#r2', '#r4', '#marco', '#e1', '#e4', '#c1', '#c2', '#c3', '#c4', '#h0', '#marcoGif', '#h1', '#h2', '#p1', '#p2', '#p3', '#p4', '#p5', '#p6', '#marcoGif2', '#g1', '#g2', '#g3', '#g4', '#f1', '#f2', '#f3', '#f4']);
     $('#subsaludo').classList.remove('on');
     apagar(['#tierra', '#amanecer', '#suelo', '#cespedTras', '#cespedFrente', '#rayos', '#velo', '#cielo']);
     $('#cielo').classList.remove('alba');
@@ -1487,7 +1476,7 @@
   /* ============ epílogo: la flor hecha a mano ============ */
   function epilogo() {
     limpiar();
-    apagar(['#marco', '#e1', '#e4', '#c1', '#c2', '#c3', '#c4', '#h0', '#marcoGif', '#h1', '#h2', '#p1', '#p2', '#p3', '#p4', '#p5', '#p6', '#marcoGif2', '#g1', '#g2', '#g3', '#g4', '#marcoGif3', '#f1', '#f2', '#f3', '#f4']);
+    apagar(['#marco', '#e1', '#e4', '#c1', '#c2', '#c3', '#c4', '#h0', '#marcoGif', '#h1', '#h2', '#p1', '#p2', '#p3', '#p4', '#p5', '#p6', '#marcoGif2', '#g1', '#g2', '#g3', '#g4', '#f1', '#f2', '#f3', '#f4']);
     ocultarTodo();
 
     luego(700, () => {
@@ -1555,6 +1544,17 @@
     luego(15200, () => reiniciarAnim($('#p6')));
   }
 
+  // el gif de euforia cede alto lo justo para que la escena quepa sin scroll
+  function ajustarEuforia() {
+    const escena = $('#euforia'), marco = $('#marcoGif2');
+    marco.style.removeProperty('--alto');
+    const sobra = escena.scrollHeight - escena.clientHeight;
+    if (sobra > 0) marco.style.setProperty('--alto', Math.max(marco.offsetHeight - sobra, 90) + 'px');
+  }
+  addEventListener('resize', ajustarEuforia);
+  $('#gif2').addEventListener('load', ajustarEuforia);
+  document.fonts.ready.then(ajustarEuforia);
+
   function euforia() {
     limpiar();
     apagar(['#marcoGif2', '#g1', '#g2', '#g3', '#g4']);
@@ -1563,6 +1563,7 @@
 
     luego(900, () => {
       mostrar('#euforia');
+      ajustarEuforia();
       reiniciarAnim($('#marcoGif2'));
     });
     luego(2600, () => reiniciarAnim($('#g1')));
@@ -1573,7 +1574,7 @@
 
   function fin() {
     limpiar();
-    apagar(['#marcoGif3', '#f1', '#f2', '#f3', '#f4']);
+    apagar(['#f1', '#f2', '#f3', '#f4']);
     ocultarTodo();
     ambiente({});
 
@@ -1583,14 +1584,11 @@
     apagar(['#amanecer', '#rayos']);
     jardin.classList.add('apagado');
 
-    luego(900, () => {
-      mostrar('#adios');
-      reiniciarAnim($('#marcoGif3'));
-    });
-    luego(2800, () => reiniciarAnim($('#f1')));
-    luego(5600, () => reiniciarAnim($('#f2')));
-    luego(7800, () => reiniciarAnim($('#f3')));
-    luego(10000, () => reiniciarAnim($('#f4')));
+    luego(900, () => mostrar('#adios'));
+    luego(1800, () => reiniciarAnim($('#f1')));
+    luego(4600, () => reiniciarAnim($('#f2')));
+    luego(6800, () => reiniciarAnim($('#f3')));
+    luego(9000, () => reiniciarAnim($('#f4')));
   }
 
   function volverAlPrincipio() {
@@ -1715,7 +1713,7 @@
   ['#btnRepetir', '#btnRepetir3', '#btnRepetir4'].forEach(sel => alPulsar(sel, volverAlPrincipio));
 
   // si flor.jpg no existe, se queda el marco con el hueco marcado
-  [['#foto', '#marco'], ['#gif', '#marcoGif'], ['#gif2', '#marcoGif2'], ['#gif3', '#marcoGif3']]
+  [['#foto', '#marco'], ['#gif', '#marcoGif'], ['#gif2', '#marcoGif2']]
     .forEach(([sImg, sMarco]) => {
       const img = $(sImg), marco = $(sMarco);
       if (!img || !marco) return;
