@@ -413,7 +413,7 @@
   #epilogo{
     /* safe: si no cabe, empieza arriba en vez de cortar la foto por encima */
     justify-content:safe center; gap:2.4rem;
-    padding:6vh 7vw 22vh;
+    padding:6vh 7vw 12vh;
     overflow-y:auto;
   }
   #hablar,#euforia,#adios,#puente{
@@ -1474,6 +1474,16 @@
   }
 
   /* ============ epílogo: la flor hecha a mano ============ */
+  // la foto cede ancho (y con el, alto) lo justo para que la escena quepa sin scroll
+  function ajustarFlor() {
+    const escena = $('#epilogo'), marco = $('#marco');
+    marco.style.removeProperty('width');
+    const sobra = escena.scrollHeight - escena.clientHeight;
+    if (sobra > 0) marco.style.width = Math.max(Math.floor(marco.offsetWidth - sobra * 3 / 4) - 1, 110) + 'px';
+  }
+  addEventListener('resize', ajustarFlor);
+  document.fonts.ready.then(ajustarFlor);
+
   function epilogo() {
     limpiar();
     apagar(['#marco', '#e1', '#e4', '#c1', '#c2', '#c3', '#c4', '#h0', '#marcoGif', '#h1', '#h2', '#p1', '#p2', '#p3', '#p4', '#p5', '#p6', '#marcoGif2', '#g1', '#g2', '#g3', '#g4', '#f1', '#f2', '#f3', '#f4']);
@@ -1481,6 +1491,7 @@
 
     luego(700, () => {
       mostrar('#epilogo');
+      ajustarFlor();
       jardin.classList.remove('fondo');
       jardin.classList.add('hondo');
       $('#velo').classList.add('on');
@@ -1497,6 +1508,7 @@
     limpiar();
     apagar(['#c1', '#c2', '#c3', '#c4']);
     ocultarTodo();
+    ambiente({ mariposas: true });
 
     luego(900, () => {
       mostrar('#cierre');
@@ -1532,6 +1544,7 @@
     limpiar();
     apagar(['#p1', '#p2', '#p3', '#p4', '#p5', '#p6']);
     ocultarTodo();
+    ambiente({ fuegos: true, fugaces: true });
 
     luego(900, () => {
       mostrar('#puente');
@@ -1559,7 +1572,7 @@
     limpiar();
     apagar(['#marcoGif2', '#g1', '#g2', '#g3', '#g4']);
     ocultarTodo();
-    ambiente({ fuegos: true, lluvia: true });
+    ambiente({ fuegos: true, corazones: true });
 
     luego(900, () => {
       mostrar('#euforia');
@@ -1723,11 +1736,9 @@
     });
 
   sembrar();
-  /* ============ fuegos artificiales y lluvia ============ */
+  /* ============ fuegos artificiales, corazones, mariposas y estrellas fugaces ============ */
   const cvF = $('#fuegos'), ctxF = cvF.getContext('2d');
 
-  // la lluvia siempre del mismo tono frio; los fuegos, calidos y vivos: no se pisan
-  const LLUVIA = '164,198,238';
   const COLORES = [
     '255,196,72',    // dorado
     '255,116,84',    // coral
@@ -1743,8 +1754,9 @@
     return i;
   }
 
-  let cohetes = [], chispas = [], gotas = [], salpica = [];
-  let hayFuegos = false, hayLluvia = false, giroF = null, proxima = 0;
+  let cohetes = [], chispas = [], corazones = [], mariposas = [], fugaces = [];
+  let hayFuegos = false, hayCorazones = false, hayMariposas = false, hayFugaces = false;
+  let giroF = null, proxima = 0, proximaMariposa = 0, proximaFugaz = 0;
 
   function medirF() {
     const dpr = Math.min(devicePixelRatio || 1, 2);
@@ -1784,67 +1796,196 @@
     }
   }
 
-  function gota() {
-    const cerca = Math.random();          // profundidad: las de delante caen mas rapido y brillan mas
+  /* --- corazones pequenos que suben y se desvanecen --- */
+  const ROSAS = ['255,110,150', '255,82,118', '255,168,196', '255,206,96'];
+
+  function corazon(abajo) {
     return {
-      x: Math.random() * (innerWidth + 260) - 130,
-      y: -40 - Math.random() * innerHeight,
-      largo: 16 + cerca * 46,
-      v: 9 + cerca * 13,
-      vx: 1.1 + cerca * 1.1,
-      capa: cerca < .34 ? 0 : cerca < .7 ? 1 : 2,
-      a: .22 + cerca * .5
+      x: Math.random() * innerWidth,
+      y: innerHeight + 20 + (abajo ? Math.random() * innerHeight * .5 : 0),
+      s: 5 + Math.random() * 9,
+      vy: .45 + Math.random() * .85,
+      f: Math.random() * Math.PI * 2,
+      vf: .018 + Math.random() * .022,
+      amp: .35 + Math.random() * .8,
+      a: .55 + Math.random() * .4,
+      tono: ROSAS[Math.floor(Math.random() * ROSAS.length)]
     };
   }
 
-  // tres capas de lluvia: cada una se dibuja de una sola pasada
-  const CAPAS = [{ ancho: 1, alfa: .34 }, { ancho: 1.5, alfa: .5 }, { ancho: 2.2, alfa: .72 }];
+  function trazarCorazon(s) {
+    ctxF.beginPath();
+    ctxF.moveTo(0, -s * .25);
+    ctxF.bezierCurveTo(-s * .5, -s * .8, -s * 1.05, -s * .1, 0, s * .62);
+    ctxF.bezierCurveTo(s * 1.05, -s * .1, s * .5, -s * .8, 0, -s * .25);
+  }
+
+  /* --- mariposas amarillas, lilas y moradas --- */
+  const ALAS = ['255,210,74', '200,162,255', '146,92,220'];
+
+  function mariposa() {
+    // nacen fuera de un borde lateral y entran volando hacia dentro
+    const izq = Math.random() < .5;
+    return {
+      x: izq ? -30 : innerWidth + 30,
+      y: innerHeight * (.12 + Math.random() * .6),
+      rumbo: (izq ? 0 : Math.PI) + (Math.random() - .5) * .9,
+      v: .9 + Math.random() * .8,
+      s: 8 + Math.random() * 7,
+      aleteo: Math.random() * Math.PI * 2,
+      va: .22 + Math.random() * .12,
+      tono: ALAS[Math.floor(Math.random() * ALAS.length)],
+      ...destino(),
+      paseos: 2 + Math.floor(Math.random() * 4)   // flores que visita antes de irse
+    };
+  }
+
+  // un punto cualquiera de la pantalla, el centro incluido: hacia ahi vuela
+  function destino() {
+    return {
+      dx: innerWidth * (.1 + Math.random() * .8),
+      dy: innerHeight * (.1 + Math.random() * .75)
+    };
+  }
+
+  // el destino de despedida: fuera de la pantalla por el lado mas cercano
+  function salida(m) {
+    return { dx: m.x < innerWidth / 2 ? -120 : innerWidth + 120, dy: m.y + (Math.random() - .5) * 200 };
+  }
+
+  function dibujarMariposa(m) {
+    const s = m.s, abre = .2 + .8 * Math.abs(Math.sin(m.aleteo));
+    ctxF.save();
+    ctxF.translate(m.x, m.y);
+    ctxF.rotate(m.rumbo + Math.PI / 2);          // la cabeza apunta hacia donde vuela
+    ctxF.shadowBlur = 10; ctxF.shadowColor = `rgba(${m.tono},.6)`;
+    for (const lado of [-1, 1]) {
+      ctxF.save();
+      ctxF.scale(lado * abre, 1);
+      ctxF.fillStyle = `rgba(${m.tono},.9)`;
+      ctxF.beginPath();
+      ctxF.ellipse(s * .55, -s * .28, s * .62, s * .44, -.55, 0, Math.PI * 2);
+      ctxF.fill();
+      ctxF.fillStyle = `rgba(${m.tono},.72)`;
+      ctxF.beginPath();
+      ctxF.ellipse(s * .4, s * .36, s * .4, s * .3, .55, 0, Math.PI * 2);
+      ctxF.fill();
+      ctxF.restore();
+    }
+    ctxF.shadowBlur = 0;
+    ctxF.fillStyle = 'rgba(46,32,24,.9)';
+    ctxF.beginPath();
+    ctxF.ellipse(0, 0, s * .09, s * .5, 0, 0, Math.PI * 2);
+    ctxF.fill();
+    ctxF.strokeStyle = 'rgba(46,32,24,.8)';
+    ctxF.lineWidth = .8;
+    ctxF.beginPath();
+    ctxF.moveTo(0, -s * .45); ctxF.lineTo(-s * .22, -s * .85);
+    ctxF.moveTo(0, -s * .45); ctxF.lineTo(s * .22, -s * .85);
+    ctxF.stroke();
+    ctxF.restore();
+  }
+
+  /* --- estrellas fugaces --- */
+  function fugaz() {
+    const aLaDerecha = Math.random() < .5;
+    const ang = (aLaDerecha ? .32 : Math.PI - .32) + (Math.random() - .5) * .3;
+    const v = 10 + Math.random() * 7;
+    return {
+      x: innerWidth * (aLaDerecha ? Math.random() * .6 : .4 + Math.random() * .6),
+      y: innerHeight * Math.random() * .3,
+      vx: Math.cos(ang) * v, vy: Math.sin(ang) * v,
+      cola: 90 + Math.random() * 110,
+      vida: 1, merma: .014 + Math.random() * .01
+    };
+  }
 
   function pintarF(t) {
     ctxF.clearRect(0, 0, innerWidth, innerHeight);
-    ctxF.globalCompositeOperation = 'lighter';   // la luz se suma: brilla sin coste de sombras
     ctxF.lineCap = 'round';
 
-    /* --- lluvia, por capas --- */
-    if (hayLluvia) {
-      const tope = innerWidth < 700 ? 150 : 300;
-      for (let i = 0; i < 10 && gotas.length < tope; i++) gotas.push(gota());
-
-      for (let c = 0; c < 3; c++) {
-        ctxF.strokeStyle = `rgba(${LLUVIA},${CAPAS[c].alfa})`;
-        ctxF.lineWidth = CAPAS[c].ancho;
-        ctxF.beginPath();
-        for (const g of gotas) {
-          if (g.capa !== c) continue;
-          ctxF.moveTo(g.x - g.vx * 2.6, g.y - g.largo);
-          ctxF.lineTo(g.x, g.y);
-        }
-        ctxF.stroke();
+    /* --- mariposas: se pintan tal cual, sin sumar luz --- */
+    if (hayMariposas && t > proximaMariposa && mariposas.length < (innerWidth < 700 ? 6 : 10)) {
+      mariposas.push(mariposa());
+      proximaMariposa = t + 500 + Math.random() * 900;
+    }
+    for (let i = mariposas.length - 1; i >= 0; i--) {
+      const m = mariposas[i];
+      m.aleteo += m.va;
+      // llegada a su destino: elige otro, o se despide si ya paseo bastante
+      if (Math.hypot(m.dx - m.x, m.dy - m.y) < 40) {
+        Object.assign(m, --m.paseos > 0 && hayMariposas ? destino() : salida(m));
       }
-
-      for (const g of gotas) {
-        g.x += g.vx; g.y += g.v;
-        if (g.y - g.largo > innerHeight) {
-          if (Math.random() < .4) salpica.push({ x: g.x, y: innerHeight - Math.random() * 14, r: 1, a: g.a * .8 });
-          Object.assign(g, gota(), { y: -g.largo });
-        }
+      if (!hayMariposas && !m.saliendo) { m.saliendo = true; Object.assign(m, salida(m)); }
+      // gira poco a poco hacia el destino, con un temblor de vuelo
+      let giro = Math.atan2(m.dy - m.y, m.dx - m.x) - m.rumbo;
+      giro = Math.atan2(Math.sin(giro), Math.cos(giro));
+      m.rumbo += Math.max(-.04, Math.min(.04, giro * .05)) + (Math.random() - .5) * .08;
+      m.x += Math.cos(m.rumbo) * m.v;
+      m.y += Math.sin(m.rumbo) * m.v + Math.sin(m.aleteo * .5) * .45;
+      const fuera = m.x < -80 || m.x > innerWidth + 80 || m.y < -80 || m.y > innerHeight + 80;
+      if (fuera) {
+        if (hayMariposas) mariposas[i] = mariposa();
+        else { mariposas.splice(i, 1); continue; }
       }
-    } else if (gotas.length) {
-      gotas.length = 0;
+      dibujarMariposa(mariposas[i]);
     }
 
-    if (salpica.length) {
-      ctxF.lineWidth = 1;
-      ctxF.beginPath();
-      for (let i = salpica.length - 1; i >= 0; i--) {
-        const sp = salpica[i];
-        sp.r += 1.1; sp.a *= .86;
-        if (sp.a < .03) { salpica.splice(i, 1); continue; }
-        ctxF.moveTo(sp.x + sp.r, sp.y);
-        ctxF.arc(sp.x, sp.y, sp.r, 0, Math.PI, true);
+    /* --- corazones subiendo --- */
+    if (hayCorazones) {
+      const tope = innerWidth < 700 ? 22 : 40;
+      if (corazones.length < tope && Math.random() < .25) corazones.push(corazon(false));
+    }
+    if (corazones.length) {
+      ctxF.shadowBlur = 8;
+      for (let i = corazones.length - 1; i >= 0; i--) {
+        const c = corazones[i];
+        c.f += c.vf;
+        c.x += Math.sin(c.f) * c.amp;
+        c.y -= c.vy;
+        if (c.y < -20) {
+          if (hayCorazones) Object.assign(c, corazon(true));
+          else { corazones.splice(i, 1); continue; }
+        }
+        // se apagan a medida que suben
+        const alfa = c.a * Math.max(0, Math.min(1, c.y / innerHeight * 1.5));
+        ctxF.save();
+        ctxF.translate(c.x, c.y);
+        ctxF.rotate(Math.sin(c.f) * .25);
+        ctxF.fillStyle = `rgba(${c.tono},${alfa})`;
+        ctxF.shadowColor = `rgba(${c.tono},${alfa * .8})`;
+        trazarCorazon(c.s * (1 + .08 * Math.sin(c.f * 3)));
+        ctxF.fill();
+        ctxF.restore();
       }
-      ctxF.strokeStyle = `rgba(${LLUVIA},.3)`;
-      ctxF.stroke();
+      ctxF.shadowBlur = 0;
+    }
+
+    ctxF.globalCompositeOperation = 'lighter';   // la luz se suma: brilla sin coste de sombras
+
+    /* --- estrellas fugaces --- */
+    if (hayFugaces && t > proximaFugaz) {
+      fugaces.push(fugaz());
+      proximaFugaz = t + 900 + Math.random() * 2600;
+    }
+    for (let i = fugaces.length - 1; i >= 0; i--) {
+      const e = fugaces[i];
+      e.x += e.vx; e.y += e.vy;
+      e.vida -= e.merma;
+      if (e.vida <= 0 || e.x < -200 || e.x > innerWidth + 200 || e.y > innerHeight) { fugaces.splice(i, 1); continue; }
+      const v = Math.hypot(e.vx, e.vy);
+      const cx = e.x - e.vx / v * e.cola, cy = e.y - e.vy / v * e.cola;
+      const g = ctxF.createLinearGradient(e.x, e.y, cx, cy);
+      g.addColorStop(0, `rgba(255,250,235,${e.vida})`);
+      g.addColorStop(.3, `rgba(255,226,160,${e.vida * .45})`);
+      g.addColorStop(1, 'rgba(255,210,120,0)');
+      ctxF.strokeStyle = g;
+      ctxF.lineWidth = 2;
+      ctxF.beginPath(); ctxF.moveTo(e.x, e.y); ctxF.lineTo(cx, cy); ctxF.stroke();
+      ctxF.fillStyle = `rgba(255,248,225,${e.vida})`;
+      ctxF.beginPath(); ctxF.arc(e.x, e.y, 1.8, 0, Math.PI * 2); ctxF.fill();
+      ctxF.fillStyle = `rgba(255,230,170,${e.vida * .25})`;
+      ctxF.beginPath(); ctxF.arc(e.x, e.y, 5, 0, Math.PI * 2); ctxF.fill();
     }
 
     /* --- cohetes --- */
@@ -1882,7 +2023,8 @@
 
     ctxF.globalCompositeOperation = 'source-over';
 
-    if (hayFuegos || hayLluvia || chispas.length || salpica.length) {
+    const algoActivo = hayFuegos || hayCorazones || hayMariposas || hayFugaces;
+    if (algoActivo || chispas.length || corazones.length || mariposas.length || fugaces.length) {
       giroF = requestAnimationFrame(pintarF);
     } else {
       giroF = null;
@@ -1890,14 +2032,16 @@
     }
   }
 
-  function ambiente({ fuegos = false, lluvia = false } = {}) {
+  // lo que se apaga no desaparece de golpe: termina su vuelo y sale de la pantalla
+  function ambiente({ fuegos = false, corazones = false, mariposas = false, fugaces = false } = {}) {
     if (quieto) return;
-    hayFuegos = fuegos; hayLluvia = lluvia;
-    cvF.classList.toggle('on', fuegos || lluvia);
+    hayFuegos = fuegos; hayCorazones = corazones; hayMariposas = mariposas; hayFugaces = fugaces;
+    const algo = fuegos || corazones || mariposas || fugaces;
+    cvF.classList.toggle('on', algo);
     // la niebla de lectura acompana a los fuegos: aparece y se va con ellos
-    $('#niebla').classList.toggle('on', fuegos || lluvia);
-    if ((fuegos || lluvia) && !giroF) {
-      proxima = 0;
+    $('#niebla').classList.toggle('on', fuegos);
+    if (algo && !giroF) {
+      proxima = proximaMariposa = proximaFugaz = 0;
       giroF = requestAnimationFrame(pintarF);
     }
   }
